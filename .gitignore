@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# If running the script locally, don't commit progress (Actions manages this)
+# Comment out the next line if you want to commit progress from local runs too
+# fetch_progress.json

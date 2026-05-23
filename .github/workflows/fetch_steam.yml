@@ -1,0 +1,48 @@
+name: Fetch Steam Game Details
+
+on:
+  workflow_dispatch:        # manual trigger only — press "Run workflow" in Actions tab
+
+# Give the workflow permission to commit files back to the repo
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340    # 5h 40m — well under GitHub's 6h limit
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run fetch script
+        run: python fetch_steam_details.py
+
+      - name: Upload output as artifact
+        if: always()          # upload even if the script errors partway through
+        uses: actions/upload-artifact@v4
+        with:
+          name: steam-game-details
+          path: |
+            steam_game_details.json
+            fetch_progress.json
+          retention-days: 90
+
+      - name: Commit results back to repo
+        if: always()          # commit even on partial runs so progress is saved
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add steam_game_details.json fetch_progress.json
+          # Only commit if there are actual changes
+          git diff --staged --quiet || git commit -m "chore: update steam game details [skip ci]"
+          git push
