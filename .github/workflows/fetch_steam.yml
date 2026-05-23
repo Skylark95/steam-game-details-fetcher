@@ -25,6 +25,8 @@ jobs:
         run: pip install requests
 
       - name: Run fetch script
+        env:
+          PYTHONUNBUFFERED: "1"
         run: python fetch_steam_details.py
 
       - name: Upload output as artifact
